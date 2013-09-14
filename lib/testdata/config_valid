@@ -1,0 +1,41 @@
+# Configuration for the tc_reader.
+
+# tcCmdPath is the path to the TC command.
+# Default: "/sbin/tc"
+tcCmdPath = "/sbin/tc"
+
+# ParseInterval is the interval in seconds in which tc_reader executes the TC
+# command and gets the Qdisc and Class statistics. Whenever SNMP daemon queries
+# tc_reader, it gets the statistics received from the last poll.
+# Default: 5
+parseInterval = 5
+
+# TcQdiscStats are the command arguments for TC needed to get Qdisc statistics.
+# The arguments should be separated by spaces.
+# Default: "-s qdisc show dev"
+tcQdiscStats = "-s qdisc show dev"
+
+# TcClassStats are the command arguments for TC needed to get Class statistics.
+# The arguments should be separated by spaces.
+# Default: "-s class show dev"
+tcClassStats = "-s class show dev"
+
+# Ifaces are the interfaces on which we want to monitor Qdiscs and Classes.
+# The interfaces should be separated by spaces.
+# Default: "eth0"
+ifaces = "eth0 eth1 eth2"
+
+# User names can be listed multiple times and define users. User is simply a
+# combination of two Qdiscs / Classes, one for upload and the other one for
+# download. Combining them this way simplifies graphing in cacti, e.g you can
+# display both the upload and the download direction on one graph, even though
+# the classes are located on dofferent interfaces.
+# Format: user = "name" "uploadName" "downloadName"
+# Separators are either tabs or spaces.
+# Default: none
+user = "user1" "eth0:2:3" "eth1:2:3"
+user =  "user2"     "eth0:2:4"  "eth1:2:4"
+
+# debug enables extensive logging to syslog. Allowed values are true or false.
+# Default: false
+debug = true

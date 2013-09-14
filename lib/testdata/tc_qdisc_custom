@@ -1,0 +1,12 @@
+qdisc dsmark 1: root refcnt 2 indices 0x0020 default_index 0x0000 
+ Sent 12548819 bytes 124105 pkt (dropped 13, overlimits 25 requeues 0) 
+ backlog 0b 0p requeues 0 
+qdisc prio 2: parent 1: bands 2 priomap  1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+ Sent 12548819 bytes 24106 pkt (dropped 128, overlimits 29 requeues 0) 
+ backlog 0b 0p requeues 0 
+qdisc sfq a: parent 4:a limit 127p quantum 1514b divisor 1024 perturb 10sec 
+ Sent 123432 bytes 1027 pkt (dropped 11, overlimits 2048 requeues 0) 
+ backlog 0b 0p requeues 0 
+qdisc sfq 6e: parent 4:b limit 127p quantum 1514b divisor 1024 perturb 10sec 
+ Sent 9397865 bytes 102745 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0 

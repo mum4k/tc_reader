@@ -1,0 +1,3 @@
+qdisc pfifo_fast 0: root refcnt 2 bands 3 priomap  1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
+ Sent 8214 bytes 48 pkt (dropped 0, overlimits 10 requeues 0) 
+ backlog 0b 0p requeues 0 

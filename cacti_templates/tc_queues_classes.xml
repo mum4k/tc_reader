@@ -1,0 +1,53 @@
+<interface>
+	<name>Get TC Qdiscs and Classes</name>
+	<description>Queries a host for a list of monitorable TC Qdiscs and Classes</description>
+	<oid_index>.1.3.6.1.4.1.2021.255.1</oid_index>
+	<oid_num_indexes>.1.3.6.1.4.1.2021.255.2</oid_num_indexes>
+	<index_order>tcName</index_order>
+	<index_order_type>numeric</index_order_type>
+	<index_title_format>|chosen_order_field|</index_title_format>
+	<fields>
+		<tcIndex>
+			<name>Index</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2021.255.1</oid>
+		</tcIndex>
+		<tcName>
+			<name>Name</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2021.255.3</oid>
+		</tcName>
+		<sentBytes>
+			<name>Bytes Sent</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.4</oid>
+		</sentBytes>
+		<sentPkt>
+			<name>Packets Sent</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.5</oid>
+		</sentPkt>
+		<droppedPkt>
+			<name>Dropped Packets</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.6</oid>
+		</droppedPkt>
+		<overLimitPkt>
+			<name>Overlimit Packets</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.7</oid>
+		</overLimitPkt>
+	</fields>
+</interface>

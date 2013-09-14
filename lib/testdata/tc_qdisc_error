@@ -1,0 +1,3 @@
+qdisc sfq 6g: parent 4:b limit 127p quantum 1514b divisor 1024 perturb 10sec 
+ Sent 9397865 bytes 102745 pkt (dropped 0, overlimits 0 requeues 0) 
+ backlog 0b 0p requeues 0 

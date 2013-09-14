@@ -1,0 +1,81 @@
+<interface>
+	<name>Get TC Users</name>
+	<description>Queries a host for a list of monitorable TC Users</description>
+	<oid_index>.1.3.6.1.4.1.2021.255.8</oid_index>
+	<oid_num_indexes>.1.3.6.1.4.1.2021.255.9</oid_num_indexes>
+	<index_order>tcUserName</index_order>
+	<index_order_type>numeric</index_order_type>
+	<index_title_format>|chosen_order_field|</index_title_format>
+	<fields>
+		<tcUserIndex>
+			<name>UserIndex</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2021.255.8</oid>
+		</tcUserIndex>
+		<tcUserName>
+			<name>UserName</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2021.255.10</oid>
+		</tcUserName>
+		<tcUserDownBytes>
+			<name>Bytes Downloaded</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.11</oid>
+		</tcUserDownBytes>
+		<tcUserDownPkt>
+			<name>Packets Downloaded</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.12</oid>
+		</tcUserDownPkt>
+		<tcUserDownDroppedPkt>
+			<name>Dropped Packets in Download direction</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.13</oid>
+		</tcUserDownDroppedPkt>
+		<tcUserDownOverLimitPkt>
+			<name>Overlimit Packets in Download directon</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.14</oid>
+		</tcUserDownOverLimitPkt>
+		<tcUserUpBytes>
+			<name>Bytes Uploaded</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.15</oid>
+		</tcUserUpBytes>
+		<tcUserUpPkt>
+			<name>Packets Uploaded</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.16</oid>
+		</tcUserUpPkt>
+		<tcUserUpDroppedPkt>
+			<name>Dropped Packets in Upload direction</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.17</oid>
+		</tcUserUpDroppedPkt>
+		<tcUserUpOverLimitPkt>
+			<name>Overlimit Packets in Upload directon</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2021.255.18</oid>
+		</tcUserUpOverLimitPkt>
+	</fields>
+</interface>

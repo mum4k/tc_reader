@@ -57,12 +57,12 @@ Sorry, no binary releases yet, coming soon...
 
 3.  You can now get the latest copy of this source-code from GitHub:
     ```
-    go get github.com/mum4k/tc\_reader
+    go get github.com/mum4k/tc_reader
     ```
 
 4.  Now to compile and install the binary run:
     ```
-    go install github.com/mum4k/tc\_reader
+    go install github.com/mum4k/tc_reader
     ```
 
 5.  You can find the compiled binary in */home/your_username/go/bin/tc\_reader*.

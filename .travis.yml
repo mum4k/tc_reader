@@ -1,0 +1,12 @@
+language: go
+go:
+        - 1.8.x
+        - master
+script:
+        - go test ./...
+        - go tool vet .
+        - go tool vet ./lib
+        - diff -u <(echo -n) <(gofmt -d -s .)
+        - diff -u <(echo -n) <(gofmt -d -s ./lib)
+after_success:
+        - ./scripts/coverage.sh

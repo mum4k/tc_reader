@@ -218,7 +218,7 @@ func (t *tcParser) start() {
 	t.parseTc()
 
 	go func() {
-		for _ = range time.Tick(time.Duration(t.options.parseInterval()) * time.Second) {
+		for range time.Tick(time.Duration(t.options.parseInterval()) * time.Second) {
 			t.parseTc()
 		}
 	}()

@@ -207,7 +207,7 @@ type snmpData struct {
 	// oid is the OID of this SNMP data.
 	oid string
 
-	// objectType is the SNMP object type, one of: integer, gauge, counter, timeticks, ipaddress, objectid, or string 
+	// objectType is the SNMP object type, one of: integer, gauge, counter, timeticks, ipaddress, objectid, or string
 	objectType string
 
 	// objectValue is the value stored in this OID.

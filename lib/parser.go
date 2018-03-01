@@ -243,23 +243,23 @@ func (t *tcParser) executeTc(iface string) (string, string, error) {
 // Executes the TC command to get statistics for Qdiscs and Classes on a interfaces and parses the output.
 //
 // Example output of 'tc -s qdisc show dev eth0':
-// qdisc dsmark 1: root refcnt 2 indices 0x0010 default_index 0x0000 
-//  Sent 8165477580 bytes 5927092 pkt (dropped 49112, overlimits 0 requeues 0) 
-//  rate 0bit 0pps backlog 0b 0p requeues 0 
+// qdisc dsmark 1: root refcnt 2 indices 0x0010 default_index 0x0000
+//  Sent 8165477580 bytes 5927092 pkt (dropped 49112, overlimits 0 requeues 0)
+//  rate 0bit 0pps backlog 0b 0p requeues 0
 // qdisc htb 2: parent 1: r2q 10 default 0 direct_packets_stat 42920
-//  Sent 8165477220 bytes 5927088 pkt (dropped 49112, overlimits 9389236 requeues 0) 
-//  rate 0bit 0pps backlog 0b 0p requeues 0 
+//  Sent 8165477220 bytes 5927088 pkt (dropped 49112, overlimits 9389236 requeues 0)
+//  rate 0bit 0pps backlog 0b 0p requeues 0
 //
 // Example output of 'tc -s class show dev eth0':
-// class htb 2:1 root rate 3072Kbit ceil 3072Kbit burst 3141b cburst 3141b 
-//  Sent 8092853284 bytes 5693309 pkt (dropped 0, overlimits 0 requeues 0) 
-//  rate 22528bit 34pps backlog 0b 0p requeues 0 
+// class htb 2:1 root rate 3072Kbit ceil 3072Kbit burst 3141b cburst 3141b
+//  Sent 8092853284 bytes 5693309 pkt (dropped 0, overlimits 0 requeues 0)
+//  rate 22528bit 34pps backlog 0b 0p requeues 0
 //  lended: 4348128 borrowed: 0 giants: 0
 //  tokens: 124922 ctokens: 124922
-// 
-// class htb 2:2 parent 2:1 leaf 3: prio 0 rate 614400bit ceil 614400bit burst 1907b cburst 1907b 
-//  Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) 
-//  rate 0bit 0pps backlog 0b 0p requeues 0 
+//
+// class htb 2:2 parent 2:1 leaf 3: prio 0 rate 614400bit ceil 614400bit burst 1907b cburst 1907b
+//  Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0)
+//  rate 0bit 0pps backlog 0b 0p requeues 0
 //  lended: 0 borrowed: 0 giants: 0
 //  tokens: 388171 ctokens: 388171
 func (t *tcParser) parseTc() {

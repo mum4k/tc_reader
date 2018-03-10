@@ -353,7 +353,7 @@ func (t *tcParser) parseData(cmdOutput string, ifaceName string, reHeader, reDat
 			haveData = false
 
 			// tcName is the internal name for this Qdisc / Class on an interface. Example: "eth0:2:3" is Class 3, Qdisc 2 on interface eth0.
-			tcName := fmt.Sprintf("%s:%s:%s", ifaceName, strconv.FormatInt(qdiscHandle, 10), strconv.FormatInt(classHandle, 10))
+			tcName := fmt.Sprintf("%s:%s:%s", ifaceName, strconv.FormatInt(qdiscHandle, 16), strconv.FormatInt(classHandle, 16))
 			data := &parsedData{
 				name:         tcName,
 				sentBytes:    sentBytes,

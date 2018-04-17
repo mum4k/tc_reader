@@ -3,6 +3,7 @@ go:
         - 1.8.x
         - stable
 script:
+        - go get -t ./...
         - go test ./...
         - go tool vet .
         - go tool vet ./lib

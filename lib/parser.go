@@ -44,7 +44,7 @@ const (
 	reClassHeaderStr = "class (?P<className>[a-zA-Z_]+) (?P<qdiscHandle>[0-9a-f]+):(?P<classHandle>[0-9a-f]+).*"
 
 	// reStatsStr is string version of the RE to match the Qdisc and Class statisticsin TC output.
-	reStatsStr = " Sent (?P<sentBytes>[0-9]+) bytes (?P<sentPkt>[0-9]+) pkt .dropped (?P<droppedPkt>[0-9]+), overlimits (?P<overLimitPkt>[0-9]+) requeues 0."
+	reStatsStr = " Sent (?P<sentBytes>[0-9]+) bytes (?P<sentPkt>[0-9]+) pkt .dropped (?P<droppedPkt>[0-9]+), overlimits (?P<overLimitPkt>[0-9]+) requeues"
 )
 
 // These variables are the default options used by tcParser.
@@ -311,13 +311,13 @@ func (t *tcParser) parseData(cmdOutput string, ifaceName string, reHeader, reDat
 		// Does this line contain the header ?
 		if match := reHeader.FindAllStringSubmatch(line, -1); match != nil {
 			matchSlice := match[0]
-			qdiscHandle, err = strconv.ParseInt(matchSlice[2], 16, 32)
+			qdiscHandle, err = strconv.ParseInt(matchSlice[2], 16, 64)
 			if err != nil {
 				return err
 			}
 			// Class handle is only present in the output for a Class. We assume zero in the output for a Qdisc.
 			if len(matchSlice) == 4 {
-				classHandle, err = strconv.ParseInt(matchSlice[3], 16, 32)
+				classHandle, err = strconv.ParseInt(matchSlice[3], 16, 64)
 				if err != nil {
 					return err
 				}
@@ -332,15 +332,15 @@ func (t *tcParser) parseData(cmdOutput string, ifaceName string, reHeader, reDat
 			if err != nil {
 				return err
 			}
-			sentPkt, err = strconv.ParseInt(matchSlice[2], 10, 32)
+			sentPkt, err = strconv.ParseInt(matchSlice[2], 10, 64)
 			if err != nil {
 				return err
 			}
-			droppedPkt, err = strconv.ParseInt(matchSlice[3], 10, 32)
+			droppedPkt, err = strconv.ParseInt(matchSlice[3], 10, 64)
 			if err != nil {
 				return err
 			}
-			overLimitPkt, err = strconv.ParseInt(matchSlice[4], 10, 32)
+			overLimitPkt, err = strconv.ParseInt(matchSlice[4], 10, 64)
 			if err != nil {
 				return err
 			}

@@ -22,6 +22,8 @@ import (
 	"reflect"
 	"regexp"
 	"testing"
+
+	"github.com/kylelemons/godebug/pretty"
 )
 
 func TestTcParserOptionsTcCmdPath(t *testing.T) {
@@ -150,19 +152,19 @@ func TestTcParserOptionsUserNameClass(t *testing.T) {
 // fakeSyslog implements the sysLogger interface and is used in tests.
 type fakeSyslog struct {
 	// info is the message logged using the Info() function call.
-	info string
+	info []string
 
 	// err is the message logged using the Err function call.
-	err string
+	err []string
 }
 
 func (fs *fakeSyslog) Info(m string) (err error) {
-	fs.info = m
+	fs.info = append(fs.info, m)
 	return nil
 }
 
 func (fs *fakeSyslog) Err(m string) (err error) {
-	fs.err = m
+	fs.err = append(fs.err, m)
 	return nil
 }
 
@@ -170,10 +172,10 @@ func TestTcParserLogIfDebug(t *testing.T) {
 	testData := []struct {
 		debug   bool
 		message string
-		expInfo string
+		expInfo []string
 	}{
-		{false, "message", ""},
-		{true, "message", "message"},
+		{false, "message", nil},
+		{true, "message", []string{"message"}},
 	}
 
 	var o *TcParserOptions
@@ -188,8 +190,8 @@ func TestTcParserLogIfDebug(t *testing.T) {
 			options: o,
 		}
 		p.logIfDebug(params.message)
-		if !reflect.DeepEqual(fs.info, params.expInfo) {
-			t.Errorf("TestTcParserLogIfDebug(testCase %d) got: '%v' want: '%v'", i, fs.info, params.expInfo)
+		if diff := pretty.Compare(params.expInfo, fs.info); diff != "" {
+			t.Errorf("TestTcParserLogIfDebug(testCase %d) unexpected log, diff (-want, +got):\n%s", i, diff)
 		}
 	}
 }
@@ -335,59 +337,28 @@ func (fs *fakeSnmp) addData(data *parsedData) {
 	fs.data = append(fs.data, *data)
 }
 
-// formatParsedData formats parsedData to a human readable format.
-func formatParsedData(d parsedData) string {
-	var direction int
-	var user string
-	if d.userClass != nil {
-		direction = d.userClass.direction
-		user = d.userClass.name
-	}
-	return fmt.Sprintf("n:%s b:%d, p:%d, d:%d, o:%d, direction:%d, user:%s", d.name, d.sentBytes, d.sentPkt, d.droppedPkt, d.overLimitPkt, direction, user)
-}
-
-// compareParsedData compares the parsed data to the expected values element by element, dereferencing pointers and providing readable output.
-func compareParsedData(received, expected []parsedData) error {
-	if len(expected) < len(received) {
-		unexpected := received[len(expected)+1]
-		return fmt.Errorf("unexpected element in received data: %s", formatParsedData(unexpected))
-	}
-
-	for i, want := range expected {
-		if len(received) < i+1 {
-			return fmt.Errorf("received data does not contain element: %s", formatParsedData(want))
-		}
-
-		if !reflect.DeepEqual(want, received[i]) {
-			return fmt.Errorf("difference in element %d\n got: %s\nwant: %s", i, formatParsedData(received[i]), formatParsedData(want))
-		}
-	}
-	return nil
-
-}
-
 func TestTcParserParse(t *testing.T) {
 	testData := []struct {
-		qdiscOutputFile     string
-		classOutputFile     string
-		qdiscExecError      error
-		classExecError      error
-		userNameClass       map[string]userClass
-		expectedLogErr      string
-		expectedData        []parsedData
-		expectedLockCount   int
-		expectedUnlockCount int
-		expectedEraseCount  int
+		desc            string
+		qdiscOutputFile string
+		classOutputFile string
+		qdiscExecError  error
+		classExecError  error
+		userNameClass   map[string]userClass
+		wantLog         []string
+		want            []parsedData
+		wantLockCount   int
+		wantUnlockCount int
+		wantEraseCount  int
 	}{
-		// A test case on a system that has custom Qdiscs and Classes configured. No user names are configured.
 		{
-			"testdata/tc_qdisc_custom",
-			"testdata/tc_class_custom",
-			nil,
-			nil,
-			map[string]userClass{"1": {1, "username"}},
-			"",
-			[]parsedData{
+			desc:            "custom Qdiscs and Classes configured, no user names are configured",
+			qdiscOutputFile: "testdata/tc_qdisc_custom",
+			classOutputFile: "testdata/tc_class_custom",
+			qdiscExecError:  nil,
+			classExecError:  nil,
+			userNameClass:   map[string]userClass{"1": {1, "username"}},
+			want: []parsedData{
 				{"eth0:1:0", 12548819, 124105, 13, 25, nil},
 				{"eth0:2:0", 12548819, 24106, 128, 29, nil},
 				{"eth0:a:0", 123432, 1027, 11, 2048, nil},
@@ -398,23 +369,36 @@ func TestTcParserParse(t *testing.T) {
 				{"eth0:4:a", 1096857, 7059, 0, 0, nil},
 				{"eth0:4:6e", 256, 13, 7, 0, nil},
 			},
-			1,
-			1,
-			1,
+			wantLockCount:   1,
+			wantUnlockCount: 1,
+			wantEraseCount:  1,
 		},
-
-		// A test case on a system that has custom Qdiscs and Classes configured. One user name is configured.
 		{
-			"testdata/tc_qdisc_custom",
-			"testdata/tc_class_custom",
-			nil,
-			nil,
-			map[string]userClass{
+			desc:            "large values are parsed correctly",
+			qdiscOutputFile: "testdata/tc_qdisc_large_values",
+			classOutputFile: "testdata/tc_class_large_values",
+			qdiscExecError:  nil,
+			classExecError:  nil,
+			userNameClass:   map[string]userClass{"1": {1, "username"}},
+			want: []parsedData{
+				{"eth0:1:0", 4791659924490, 4791659924491, 4791659924492, 4791659924493, nil},
+				{"eth0:2:1", 4791659924495, 4791659924496, 4791659924497, 4791659924498, nil},
+			},
+			wantLockCount:   1,
+			wantUnlockCount: 1,
+			wantEraseCount:  1,
+		},
+		{
+			desc:            "custom Qdiscs and Classes configured, one user name is configured",
+			qdiscOutputFile: "testdata/tc_qdisc_custom",
+			classOutputFile: "testdata/tc_class_custom",
+			qdiscExecError:  nil,
+			classExecError:  nil,
+			userNameClass: map[string]userClass{
 				"eth0:4:1": {0, "username"},
 				"eth0:4:a": {1, "username"},
 			},
-			"",
-			[]parsedData{
+			want: []parsedData{
 				{"eth0:1:0", 12548819, 124105, 13, 25, nil},
 				{"eth0:2:0", 12548819, 24106, 128, 29, nil},
 				{"eth0:a:0", 123432, 1027, 11, 2048, nil},
@@ -427,114 +411,112 @@ func TestTcParserParse(t *testing.T) {
 				{"eth0:4:a", 1096857, 7059, 0, 0, &userClass{1, "username"}},
 				{"eth0:4:6e", 256, 13, 7, 0, nil},
 			},
-			1,
-			1,
-			1,
+			wantLockCount:   1,
+			wantUnlockCount: 1,
+			wantEraseCount:  1,
 		},
-
-		// A test case on a system that has the default Qdiscs and no classes.
 		{
-			"testdata/tc_qdisc_default",
-			"testdata/tc_no_output",
-			nil,
-			nil,
-			map[string]userClass{
+			desc:            "the default Qdiscs and no classes",
+			qdiscOutputFile: "testdata/tc_qdisc_default",
+			classOutputFile: "testdata/tc_no_output",
+			qdiscExecError:  nil,
+			classExecError:  nil,
+			userNameClass: map[string]userClass{
 				"eth0:4:1":  {0, "username"},
 				"eth0:4:10": {1, "username"},
 			},
-			"",
-			[]parsedData{
+			want: []parsedData{
 				{"eth0:0:0", 8214, 48, 0, 10, nil},
 			},
-			1,
-			1,
-			1,
+			wantLockCount:   1,
+			wantUnlockCount: 1,
+			wantEraseCount:  1,
 		},
-
-		// A test case where we are unable to execute the TC command.
 		{
-			"testdata/tc_qdisc_custom",
-			"testdata/tc_class_custom",
-			fmt.Errorf("cannot execute"),
-			nil,
-			map[string]userClass{
+			desc:            "unable to execute the TC command",
+			qdiscOutputFile: "testdata/tc_qdisc_custom",
+			classOutputFile: "testdata/tc_class_custom",
+			qdiscExecError:  fmt.Errorf("cannot execute"),
+			classExecError:  nil,
+			userNameClass: map[string]userClass{
 				"eth0:4:1":  {0, "username"},
 				"eth0:4:10": {1, "username"},
 			},
-			"parseTc(): Unable to get TC command output, error: cannot execute",
-			[]parsedData{},
-			1,
-			1,
-			1,
+			wantLog: []string{
+				"parseTc(): Unable to get TC command output, error: cannot execute",
+			},
+			want:            []parsedData{},
+			wantLockCount:   1,
+			wantUnlockCount: 1,
+			wantEraseCount:  1,
 		},
-
-		// A test case where we get no output from the TC command.
 		{
-			"testdata/tc_no_output",
-			"testdata/tc_no_output",
-			nil,
-			nil,
-			map[string]userClass{
+			desc:            "no output from the TC command",
+			qdiscOutputFile: "testdata/tc_no_output",
+			classOutputFile: "testdata/tc_no_output",
+			qdiscExecError:  nil,
+			classExecError:  nil,
+			userNameClass: map[string]userClass{
 				"eth0:4:1":  {0, "username"},
 				"eth0:4:10": {1, "username"},
 			},
-			"",
-			[]parsedData{},
-			1,
-			1,
-			1,
+			want:            []parsedData{},
+			wantLockCount:   1,
+			wantUnlockCount: 1,
+			wantEraseCount:  1,
 		},
 	}
 
 	var p *tcParser
-	for i, params := range testData {
-		fs := &fakeSyslog{}
-		fsn := &fakeSnmp{}
+	for _, tc := range testData {
+		t.Run(tc.desc, func(t *testing.T) {
+			fs := &fakeSyslog{}
+			fsn := &fakeSnmp{}
 
-		qdiscFile, err := ioutil.ReadFile(params.qdiscOutputFile)
-		if err != nil {
-			t.Errorf("TestTcParserParse(testcase %d), ReadFile %s, err: %s", i, params.qdiscOutputFile, err)
-		}
-		classFile, err := ioutil.ReadFile(params.classOutputFile)
-		if err != nil {
-			t.Errorf("TestTcParserParse(testcase %d), ReadFile %s, err: %s", i, params.classOutputFile, err)
-		}
-		var outputs []string = []string{string(qdiscFile), string(classFile)}
-		var errors []error = []error{params.qdiscExecError, params.classExecError}
+			qdiscFile, err := ioutil.ReadFile(tc.qdiscOutputFile)
+			if err != nil {
+				t.Fatalf("ReadFile %s => unexpected err: %s", tc.qdiscOutputFile, err)
+			}
+			classFile, err := ioutil.ReadFile(tc.classOutputFile)
+			if err != nil {
+				t.Fatalf("ReadFile %s => unexpected err: %s", tc.classOutputFile, err)
+			}
+			var outputs []string = []string{string(qdiscFile), string(classFile)}
+			var errors []error = []error{tc.qdiscExecError, tc.classExecError}
 
-		o := &TcParserOptions{
-			Ifaces:        []string{"eth0"},
-			UserNameClass: params.userNameClass,
-		}
-		fe := &fakeExecuter{
-			output: outputs,
-			err:    errors,
-		}
-		p = &tcParser{
-			logger:        fs,
-			options:       o,
-			snmp:          fsn,
-			executer:      fe,
-			reQdiscHeader: regexp.MustCompile(reQdiscHeaderStr),
-			reClassHeader: regexp.MustCompile(reClassHeaderStr),
-			reStats:       regexp.MustCompile(reStatsStr),
-		}
-		p.parseTc()
-		if !reflect.DeepEqual(fs.err, params.expectedLogErr) {
-			t.Errorf("TestTcParserParse(testCase %d) expectedLogErr got: '%v' want: '%v'", i, fs.err, params.expectedLogErr)
-		}
-		err = compareParsedData(fsn.data, params.expectedData)
-		if err != nil {
-			t.Errorf("TestTcParserParse(testCase %d) expectedData: %s", i, err)
-		}
-		if !reflect.DeepEqual(fsn.lockCount, params.expectedLockCount) {
-			t.Errorf("TestTcParserParse(testCase %d) expectedLockCount got: '%v' want: '%v'", i, fsn.lockCount, params.expectedLockCount)
-		}
-		if !reflect.DeepEqual(fsn.unlockCount, params.expectedUnlockCount) {
-			t.Errorf("TestTcParserParse(testCase %d) expectedUnlockCount got: '%v' want: '%v'", i, fsn.unlockCount, params.expectedUnlockCount)
-		}
-		if !reflect.DeepEqual(fsn.eraseCount, params.expectedEraseCount) {
-			t.Errorf("TestTcParserParse(testCase %d) expectedEraseCount got: '%v' want: '%v'", i, fsn.eraseCount, params.expectedEraseCount)
-		}
+			o := &TcParserOptions{
+				Ifaces:        []string{"eth0"},
+				UserNameClass: tc.userNameClass,
+			}
+			fe := &fakeExecuter{
+				output: outputs,
+				err:    errors,
+			}
+			p = &tcParser{
+				logger:        fs,
+				options:       o,
+				snmp:          fsn,
+				executer:      fe,
+				reQdiscHeader: regexp.MustCompile(reQdiscHeaderStr),
+				reClassHeader: regexp.MustCompile(reClassHeaderStr),
+				reStats:       regexp.MustCompile(reStatsStr),
+			}
+			p.parseTc()
+			if !reflect.DeepEqual(fs.err, tc.wantLog) {
+				t.Errorf("parseTc => wantLog got: '%v' want: '%v'", fs.err, tc.wantLog)
+			}
+			if diff := pretty.Compare(tc.want, fsn.data); diff != "" {
+				t.Errorf("parseTc => unexpected data, diff(-want, +got):\n%s", diff)
+			}
+			if !reflect.DeepEqual(fsn.lockCount, tc.wantLockCount) {
+				t.Errorf("parseTc => wantLockCount got: '%v' want: '%v'", fsn.lockCount, tc.wantLockCount)
+			}
+			if !reflect.DeepEqual(fsn.unlockCount, tc.wantUnlockCount) {
+				t.Errorf("parseTc => wantUnlockCount got: '%v' want: '%v'", fsn.unlockCount, tc.wantUnlockCount)
+			}
+			if !reflect.DeepEqual(fsn.eraseCount, tc.wantEraseCount) {
+				t.Errorf("parseTc => wantEraseCount got: '%v' want: '%v'", fsn.eraseCount, tc.wantEraseCount)
+			}
+		})
 	}
 }

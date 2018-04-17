@@ -27,10 +27,10 @@ func TestSnmpLogIfDebug(t *testing.T) {
 	testData := []struct {
 		debug   bool
 		message string
-		expInfo string
+		expInfo []string
 	}{
-		{false, "message", ""},
-		{true, "message", "message"},
+		{false, "message", nil},
+		{true, "message", []string{"message"}},
 	}
 
 	var o *SnmpOptions

@@ -20,7 +20,10 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strconv"
 	"testing"
+
+	"github.com/kylelemons/godebug/pretty"
 )
 
 func TestSnmpLogIfDebug(t *testing.T) {
@@ -144,10 +147,10 @@ func TestSnmpAddData(t *testing.T) {
 				".1.3.6.1.4.1.2021.255.1.1": {".1.3.6.1.4.1.2021.255.1.1", "integer", 1},
 				".1.3.6.1.4.1.2021.255.2":   {".1.3.6.1.4.1.2021.255.2", "integer", 1},
 				".1.3.6.1.4.1.2021.255.3.1": {".1.3.6.1.4.1.2021.255.3.1", "string", "eth0:2:3"},
-				".1.3.6.1.4.1.2021.255.4.1": {".1.3.6.1.4.1.2021.255.4.1", "counter", int64(1)},
-				".1.3.6.1.4.1.2021.255.5.1": {".1.3.6.1.4.1.2021.255.5.1", "counter", int64(2)},
-				".1.3.6.1.4.1.2021.255.6.1": {".1.3.6.1.4.1.2021.255.6.1", "counter", int64(3)},
-				".1.3.6.1.4.1.2021.255.7.1": {".1.3.6.1.4.1.2021.255.7.1", "counter", int64(4)},
+				".1.3.6.1.4.1.2021.255.4.1": {".1.3.6.1.4.1.2021.255.4.1", "counter64", int64(1)},
+				".1.3.6.1.4.1.2021.255.5.1": {".1.3.6.1.4.1.2021.255.5.1", "counter64", int64(2)},
+				".1.3.6.1.4.1.2021.255.6.1": {".1.3.6.1.4.1.2021.255.6.1", "counter64", int64(3)},
+				".1.3.6.1.4.1.2021.255.7.1": {".1.3.6.1.4.1.2021.255.7.1", "counter64", int64(4)},
 			},
 			[]string{
 				".1.3.6.1.4.1.2021.255",
@@ -191,14 +194,14 @@ func TestSnmpAddData(t *testing.T) {
 				".1.3.6.1.4.1.2021.255.8.1":  {".1.3.6.1.4.1.2021.255.8.1", "integer", 1},
 				".1.3.6.1.4.1.2021.255.9":    {".1.3.6.1.4.1.2021.255.9", "integer", 1},
 				".1.3.6.1.4.1.2021.255.10.1": {".1.3.6.1.4.1.2021.255.10.1", "string", "username"},
-				".1.3.6.1.4.1.2021.255.11.1": {".1.3.6.1.4.1.2021.255.11.1", "counter", int64(5)},
-				".1.3.6.1.4.1.2021.255.12.1": {".1.3.6.1.4.1.2021.255.12.1", "counter", int64(6)},
-				".1.3.6.1.4.1.2021.255.13.1": {".1.3.6.1.4.1.2021.255.13.1", "counter", int64(7)},
-				".1.3.6.1.4.1.2021.255.14.1": {".1.3.6.1.4.1.2021.255.14.1", "counter", int64(8)},
-				".1.3.6.1.4.1.2021.255.15.1": {".1.3.6.1.4.1.2021.255.15.1", "counter", int64(1)},
-				".1.3.6.1.4.1.2021.255.16.1": {".1.3.6.1.4.1.2021.255.16.1", "counter", int64(2)},
-				".1.3.6.1.4.1.2021.255.17.1": {".1.3.6.1.4.1.2021.255.17.1", "counter", int64(3)},
-				".1.3.6.1.4.1.2021.255.18.1": {".1.3.6.1.4.1.2021.255.18.1", "counter", int64(4)},
+				".1.3.6.1.4.1.2021.255.11.1": {".1.3.6.1.4.1.2021.255.11.1", "counter64", int64(5)},
+				".1.3.6.1.4.1.2021.255.12.1": {".1.3.6.1.4.1.2021.255.12.1", "counter64", int64(6)},
+				".1.3.6.1.4.1.2021.255.13.1": {".1.3.6.1.4.1.2021.255.13.1", "counter64", int64(7)},
+				".1.3.6.1.4.1.2021.255.14.1": {".1.3.6.1.4.1.2021.255.14.1", "counter64", int64(8)},
+				".1.3.6.1.4.1.2021.255.15.1": {".1.3.6.1.4.1.2021.255.15.1", "counter64", int64(1)},
+				".1.3.6.1.4.1.2021.255.16.1": {".1.3.6.1.4.1.2021.255.16.1", "counter64", int64(2)},
+				".1.3.6.1.4.1.2021.255.17.1": {".1.3.6.1.4.1.2021.255.17.1", "counter64", int64(3)},
+				".1.3.6.1.4.1.2021.255.18.1": {".1.3.6.1.4.1.2021.255.18.1", "counter64", int64(4)},
 			},
 			[]string{
 				".1.3.6.1.4.1.2021.255",
@@ -247,21 +250,21 @@ func TestSnmpAddData(t *testing.T) {
 				".1.3.6.1.4.1.2021.255.1.1":  {".1.3.6.1.4.1.2021.255.1.1", "integer", 1},
 				".1.3.6.1.4.1.2021.255.2":    {".1.3.6.1.4.1.2021.255.2", "integer", 1},
 				".1.3.6.1.4.1.2021.255.3.1":  {".1.3.6.1.4.1.2021.255.3.1", "string", "eth0:1:3"},
-				".1.3.6.1.4.1.2021.255.4.1":  {".1.3.6.1.4.1.2021.255.4.1", "counter", int64(9)},
-				".1.3.6.1.4.1.2021.255.5.1":  {".1.3.6.1.4.1.2021.255.5.1", "counter", int64(10)},
-				".1.3.6.1.4.1.2021.255.6.1":  {".1.3.6.1.4.1.2021.255.6.1", "counter", int64(11)},
-				".1.3.6.1.4.1.2021.255.7.1":  {".1.3.6.1.4.1.2021.255.7.1", "counter", int64(12)},
+				".1.3.6.1.4.1.2021.255.4.1":  {".1.3.6.1.4.1.2021.255.4.1", "counter64", int64(9)},
+				".1.3.6.1.4.1.2021.255.5.1":  {".1.3.6.1.4.1.2021.255.5.1", "counter64", int64(10)},
+				".1.3.6.1.4.1.2021.255.6.1":  {".1.3.6.1.4.1.2021.255.6.1", "counter64", int64(11)},
+				".1.3.6.1.4.1.2021.255.7.1":  {".1.3.6.1.4.1.2021.255.7.1", "counter64", int64(12)},
 				".1.3.6.1.4.1.2021.255.8.1":  {".1.3.6.1.4.1.2021.255.8.1", "integer", 1},
 				".1.3.6.1.4.1.2021.255.9":    {".1.3.6.1.4.1.2021.255.9", "integer", 1},
 				".1.3.6.1.4.1.2021.255.10.1": {".1.3.6.1.4.1.2021.255.10.1", "string", "username"},
-				".1.3.6.1.4.1.2021.255.11.1": {".1.3.6.1.4.1.2021.255.11.1", "counter", int64(5)},
-				".1.3.6.1.4.1.2021.255.12.1": {".1.3.6.1.4.1.2021.255.12.1", "counter", int64(6)},
-				".1.3.6.1.4.1.2021.255.13.1": {".1.3.6.1.4.1.2021.255.13.1", "counter", int64(7)},
-				".1.3.6.1.4.1.2021.255.14.1": {".1.3.6.1.4.1.2021.255.14.1", "counter", int64(8)},
-				".1.3.6.1.4.1.2021.255.15.1": {".1.3.6.1.4.1.2021.255.15.1", "counter", int64(1)},
-				".1.3.6.1.4.1.2021.255.16.1": {".1.3.6.1.4.1.2021.255.16.1", "counter", int64(2)},
-				".1.3.6.1.4.1.2021.255.17.1": {".1.3.6.1.4.1.2021.255.17.1", "counter", int64(3)},
-				".1.3.6.1.4.1.2021.255.18.1": {".1.3.6.1.4.1.2021.255.18.1", "counter", int64(4)},
+				".1.3.6.1.4.1.2021.255.11.1": {".1.3.6.1.4.1.2021.255.11.1", "counter64", int64(5)},
+				".1.3.6.1.4.1.2021.255.12.1": {".1.3.6.1.4.1.2021.255.12.1", "counter64", int64(6)},
+				".1.3.6.1.4.1.2021.255.13.1": {".1.3.6.1.4.1.2021.255.13.1", "counter64", int64(7)},
+				".1.3.6.1.4.1.2021.255.14.1": {".1.3.6.1.4.1.2021.255.14.1", "counter64", int64(8)},
+				".1.3.6.1.4.1.2021.255.15.1": {".1.3.6.1.4.1.2021.255.15.1", "counter64", int64(1)},
+				".1.3.6.1.4.1.2021.255.16.1": {".1.3.6.1.4.1.2021.255.16.1", "counter64", int64(2)},
+				".1.3.6.1.4.1.2021.255.17.1": {".1.3.6.1.4.1.2021.255.17.1", "counter64", int64(3)},
+				".1.3.6.1.4.1.2021.255.18.1": {".1.3.6.1.4.1.2021.255.18.1", "counter64", int64(4)},
 			},
 			[]string{
 				".1.3.6.1.4.1.2021.255",
@@ -400,83 +403,76 @@ func TestSnmpListen(t *testing.T) {
 	s.unlock()
 
 	testData := []struct {
+		desc     string
 		commands []string
-		expected []string
+		want     []string
 	}{
 
-		// A test case with simple PING-PONG exchange.
 		{
-			[]string{"PING", ""},
-			[]string{"PONG"},
+			desc:     "simple PING-PONG exchange",
+			commands: []string{"PING", ""},
+			want:     []string{"PONG"},
 		},
-
-		// A test case with standard SNMP GET for a known OID - a string.
 		{
-			[]string{"PING", "get", ".1.3.6.1.4.1.2021.255.3.1", ""},
-			[]string{"PONG", ".1.3.6.1.4.1.2021.255.3.1", "string", "eth0:1:3"},
+			desc:     "standard SNMP GET for a known OID - a string",
+			commands: []string{"PING", "get", ".1.3.6.1.4.1.2021.255.3.1", ""},
+			want:     []string{"PONG", ".1.3.6.1.4.1.2021.255.3.1", "string", "eth0:1:3"},
 		},
-
-		// A test case with standard SNMP GET for a known OID - an integer.
 		{
-			[]string{"PING", "get", ".1.3.6.1.4.1.2021.255.1.1", ""},
-			[]string{"PONG", ".1.3.6.1.4.1.2021.255.1.1", "integer", "1"},
+			desc:     "standard SNMP GET for a known OID - an integer",
+			commands: []string{"PING", "get", ".1.3.6.1.4.1.2021.255.1.1", ""},
+			want:     []string{"PONG", ".1.3.6.1.4.1.2021.255.1.1", "integer", "1"},
 		},
-
-		// A test case with standard SNMP GET for a known OID - a counter.
 		{
-			[]string{"PING", "get", ".1.3.6.1.4.1.2021.255.4.1", ""},
-			[]string{"PONG", ".1.3.6.1.4.1.2021.255.4.1", "counter", "9"},
+			desc:     "standard SNMP GET for a known OID - a counter64",
+			commands: []string{"PING", "get", ".1.3.6.1.4.1.2021.255.4.1", ""},
+			want:     []string{"PONG", ".1.3.6.1.4.1.2021.255.4.1", "counter64", "9"},
 		},
-
-		// A test case with standard SNMP GET for a known OID - a counter, but the internal value is at the math.MaxInt32.
 		{
-			[]string{"PING", "get", ".1.3.6.1.4.1.2021.255.6.1", ""},
-			[]string{"PONG", ".1.3.6.1.4.1.2021.255.6.1", "counter", "0"},
+			desc:     "standard SNMP GET for a known OID - a counter64, and the value is at the math.MaxInt32",
+			commands: []string{"PING", "get", ".1.3.6.1.4.1.2021.255.6.1", ""},
+			want:     []string{"PONG", ".1.3.6.1.4.1.2021.255.6.1", "counter64", strconv.Itoa(math.MaxInt32)},
 		},
-
-		// A test case with standard SNMP GET for a known OID - a counter, but the internal value is larger than math.MaxInt32.
 		{
-			[]string{"PING", "get", ".1.3.6.1.4.1.2021.255.7.1", ""},
-			[]string{"PONG", ".1.3.6.1.4.1.2021.255.7.1", "counter", "1"},
+			desc:     "standard SNMP GET for a known OID - a counter64, and the value is larger than math.MaxInt32",
+			commands: []string{"PING", "get", ".1.3.6.1.4.1.2021.255.7.1", ""},
+			want:     []string{"PONG", ".1.3.6.1.4.1.2021.255.7.1", "counter64", strconv.Itoa(math.MaxInt32 + 1)},
 		},
-
-		// A test case with standard SNMP GET for unknown OID.
 		{
-			[]string{"PING", "get", ".1.3.7", ""},
-			[]string{"PONG", ""},
+			desc:     "standard SNMP GET for unknown OID",
+			commands: []string{"PING", "get", ".1.3.7", ""},
+			want:     []string{"PONG", ""},
 		},
-
-		// A test case with standard SNMP GET-NEXT for two known OIDs.
 		{
-			[]string{"PING", "getnext", ".1.3.6.1.4.1.2021.255.9", "getnext", ".1.3.6.1.4.1.2021.255.10", ""},
-			[]string{"PONG", ".1.3.6.1.4.1.2021.255.10", "string", "tcUserNameLeaf", ".1.3.6.1.4.1.2021.255.10.1", "string", "username"},
+			desc:     "standard SNMP GET-NEXT for two known OIDs",
+			commands: []string{"PING", "getnext", ".1.3.6.1.4.1.2021.255.9", "getnext", ".1.3.6.1.4.1.2021.255.10", ""},
+			want:     []string{"PONG", ".1.3.6.1.4.1.2021.255.10", "string", "tcUserNameLeaf", ".1.3.6.1.4.1.2021.255.10.1", "string", "username"},
 		},
-
-		// A test case with standard SNMP GET-NEXT for the last OID.
 		{
-			[]string{"PING", "getnext", ".1.3.6.1.4.1.2021.255.18.1", ""},
-			[]string{"PONG", ""},
+			desc:     "standard SNMP GET-NEXT for the last OID",
+			commands: []string{"PING", "getnext", ".1.3.6.1.4.1.2021.255.18.1", ""},
+			want:     []string{"PONG", ""},
 		},
-
-		// A test case with standard SNMP GET-NEXT for unknown OID.
 		{
-			[]string{"PING", "getnext", ".1.3.7", ""},
-			[]string{"PONG", ""},
+			desc:     "standard SNMP GET-NEXT for unknown OID",
+			commands: []string{"PING", "getnext", ".1.3.7", ""},
+			want:     []string{"PONG", ""},
 		},
-
-		// A test case with unknown command.
 		{
-			[]string{"PING", "set", ""},
-			[]string{"PONG", ""},
+			desc:     "unknown command",
+			commands: []string{"PING", "set", ""},
+			want:     []string{"PONG", ""},
 		},
 	}
 
-	for i, params := range testData {
-		tr.erase()
-		tr.input = params.commands
-		s.Listen()
-		if !reflect.DeepEqual(tr.output, params.expected) {
-			t.Errorf("TestSnmpListen(testCase %d) \n got: '%v', \nwant: '%v'.", i, tr.output, params.expected)
-		}
+	for _, tc := range testData {
+		t.Run(tc.desc, func(t *testing.T) {
+			tr.erase()
+			tr.input = tc.commands
+			s.Listen()
+			if diff := pretty.Compare(tc.want, tr.output); diff != "" {
+				t.Errorf("Listen => unexpected output, diff (-want, +got)\n%s", diff)
+			}
+		})
 	}
 }

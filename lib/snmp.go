@@ -23,7 +23,6 @@ import (
 	"bufio"
 	"fmt"
 	"log/syslog"
-	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -207,7 +206,9 @@ type snmpData struct {
 	// oid is the OID of this SNMP data.
 	oid string
 
-	// objectType is the SNMP object type, one of: integer, gauge, counter, timeticks, ipaddress, objectid, or string
+	// objectType is the SNMP object type, one of: integer, gauge, counter, timeticks, ipaddress, objectid, or string.
+	// More object types are now supported, see:
+	// https://github.com/haad/net-snmp/blob/master/agent/mibgroup/ucd-snmp/pass_persist.c
 	objectType string
 
 	// objectValue is the value stored in this OID.
@@ -330,37 +331,37 @@ func (s *snmp) addSnmpData(oid, objectType string, objectValue interface{}) {
 func (s *snmp) addGenericData(data *parsedData) {
 	tcIndex, ok := s.nameToIndex[data.name]
 	if !ok {
-		// Popullate tcIndexLeaf.
+		// Populate tcIndexLeaf.
 		s.tcLastNameIndex += 1
 		tcIndex = s.tcLastNameIndex
 		s.nameToIndex[data.name] = tcIndex
-		// Popullate tcIndexLeaf.
+		// Populate tcIndexLeaf.
 		tcIndexOID := fmt.Sprintf("%s.%d.%d", myOID, tcIndexLeaf, tcIndex)
 		s.addSnmpData(tcIndexOID, "integer", tcIndex)
 
-		// Popullate tcNameLeaf.
+		// Populate tcNameLeaf.
 		tcNameOID := fmt.Sprintf("%s.%d.%d", myOID, tcNameLeaf, tcIndex)
 		s.addSnmpData(tcNameOID, "string", data.name)
 
-		// Popullate tcNumIndexLeaf.
+		// Populate tcNumIndexLeaf.
 		s.addSnmpData(fmt.Sprintf("%s.%d", myOID, tcNumIndexLeaf), "integer", s.tcLastNameIndex)
 	}
 
-	// Popullate sentBytesLeaf.
+	// Populate sentBytesLeaf.
 	tcSentBytesOID := fmt.Sprintf("%s.%d.%d", myOID, sentBytesLeaf, tcIndex)
-	s.addSnmpData(tcSentBytesOID, "counter", data.sentBytes)
+	s.addSnmpData(tcSentBytesOID, "counter64", data.sentBytes)
 
-	// Popullate sentPktLeaf.
+	// Populate sentPktLeaf.
 	tcSentPktOID := fmt.Sprintf("%s.%d.%d", myOID, sentPktLeaf, tcIndex)
-	s.addSnmpData(tcSentPktOID, "counter", data.sentPkt)
+	s.addSnmpData(tcSentPktOID, "counter64", data.sentPkt)
 
-	// Popullate droppedPktLeaf.
+	// Populate droppedPktLeaf.
 	tcDroppedPktOID := fmt.Sprintf("%s.%d.%d", myOID, droppedPktLeaf, tcIndex)
-	s.addSnmpData(tcDroppedPktOID, "counter", data.droppedPkt)
+	s.addSnmpData(tcDroppedPktOID, "counter64", data.droppedPkt)
 
-	// Popullate overLimitPktLeaf.
+	// Populate overLimitPktLeaf.
 	tcOverlimitPktOID := fmt.Sprintf("%s.%d.%d", myOID, overLimitPktLeaf, tcIndex)
-	s.addSnmpData(tcOverlimitPktOID, "counter", data.overLimitPkt)
+	s.addSnmpData(tcOverlimitPktOID, "counter64", data.overLimitPkt)
 }
 
 // addUserData stores the data from parsedData as data for a configured user name.
@@ -368,14 +369,14 @@ func (s *snmp) addUserData(data *parsedData) {
 	// Create new index for this user if we don't have it already.
 	tcUserIndex, ok := s.userToIndex[data.userClass.name]
 	if !ok {
-		// Popullate tcUserIndexLeaf.
+		// Populate tcUserIndexLeaf.
 		s.tcLastUserIndex += 1
 		tcUserIndex = s.tcLastUserIndex
 		s.userToIndex[data.userClass.name] = s.tcLastUserIndex
 		tcUserIndexOID := fmt.Sprintf("%s.%d.%d", myOID, tcUserIndexLeaf, tcUserIndex)
 		s.addSnmpData(tcUserIndexOID, "integer", tcUserIndex)
 
-		// Popullate tcUserNameLeaf.
+		// Populate tcUserNameLeaf.
 		tcUserNameOID := fmt.Sprintf("%s.%d.%d", myOID, tcUserNameLeaf, tcUserIndex)
 		s.addSnmpData(tcUserNameOID, "string", data.userClass.name)
 
@@ -396,24 +397,24 @@ func (s *snmp) addUserData(data *parsedData) {
 		tcUserDroppedPktOID = fmt.Sprintf("%s.%d.%d", myOID, tcUserDownDroppedPktLeaf, tcUserIndex)
 		tcUserOverLimitPktOID = fmt.Sprintf("%s.%d.%d", myOID, tcUserDownOverLimitPktLeaf, tcUserIndex)
 	}
-	// Popullate tcUser*BytesLeaf.
+	// Populate tcUser*BytesLeaf.
 	if tcUserBytesOID != "" {
-		s.addSnmpData(tcUserBytesOID, "counter", data.sentBytes)
+		s.addSnmpData(tcUserBytesOID, "counter64", data.sentBytes)
 	}
 
-	// Popullate tcUser*PktLeaf.
+	// Populate tcUser*PktLeaf.
 	if tcUserPktOID != "" {
-		s.addSnmpData(tcUserPktOID, "counter", data.sentPkt)
+		s.addSnmpData(tcUserPktOID, "counter64", data.sentPkt)
 	}
 
-	// Popullate tcUser*DroppedPktLeaf.
+	// Populate tcUser*DroppedPktLeaf.
 	if tcUserDroppedPktOID != "" {
-		s.addSnmpData(tcUserDroppedPktOID, "counter", data.droppedPkt)
+		s.addSnmpData(tcUserDroppedPktOID, "counter64", data.droppedPkt)
 	}
 
-	// Popullate tcUser*OverLimitPktLeaf.
+	// Populate tcUser*OverLimitPktLeaf.
 	if tcUserOverLimitPktOID != "" {
-		s.addSnmpData(tcUserOverLimitPktOID, "counter", data.overLimitPkt)
+		s.addSnmpData(tcUserOverLimitPktOID, "counter64", data.overLimitPkt)
 	}
 }
 
@@ -483,13 +484,11 @@ func (s *snmp) printData(data *snmpData) {
 		} else {
 			s.snmpTalker.putLine(value)
 		}
-	case "counter":
+	case "counter64":
 		if value, ok := data.objectValue.(int64); !ok {
 			s.snmpTalker.putLine(emptyLine)
 		} else {
-			// Unfortunatelly SNMP daemon does not support counter64 for pass_persist scripts yet. Need to rotate this around at math.MaxInt32.
-			rotated := math.Mod(float64(value), float64(math.MaxInt32))
-			s.snmpTalker.putLine(strconv.FormatInt(int64(rotated), 10))
+			s.snmpTalker.putLine(strconv.FormatInt(value, 10))
 		}
 	case "integer":
 		if value, ok := data.objectValue.(int); !ok {

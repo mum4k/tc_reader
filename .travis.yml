@@ -5,8 +5,8 @@ go:
 script:
         - go get -t ./...
         - go test ./...
-        - go tool vet .
-        - go tool vet ./lib
+        - go vet .
+        - go vet ./lib
         - diff -u <(echo -n) <(gofmt -d -s .)
         - diff -u <(echo -n) <(gofmt -d -s ./lib)
 after_success:

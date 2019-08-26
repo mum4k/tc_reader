@@ -1,6 +1,5 @@
 language: go
 go:
-        - 1.8.x
         - stable
 script:
         - go get -t ./...
